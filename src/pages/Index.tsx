@@ -1,10 +1,21 @@
 
 import React from 'react';
-import QRScanner from '@/components/QRScanner';
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  // Immediately redirect to the name page
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/name');
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="py-6 px-6 border-b border-gray-100">
@@ -21,23 +32,16 @@ const Index = () => {
             </div>
             <h1 className="text-4xl font-bold mb-3">Voting App</h1>
             <p className="text-gray-500 mb-6">
-              Scan a QR code to enter the voting system or simply use the button below.
+              You'll be redirected to create your profile in a moment...
             </p>
-          </div>
-          
-          <div className="mb-12 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <QRScanner />
-          </div>
-          
-          <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <p className="text-gray-500 mb-3">Don't have a QR code?</p>
-            <Link 
-              to="/name" 
-              className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors"
+            
+            <Button 
+              onClick={() => navigate('/name')} 
+              className="mt-4 animate-pulse"
             >
-              Continue without scanning
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+              Continue to Profile
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </main>
