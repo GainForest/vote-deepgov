@@ -1,12 +1,5 @@
 
-import { createClient } from '@supabase/supabase-js';
-
-// Environment variables from Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-// Create a single supabase client for the entire app
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from "@/integrations/supabase/client";
 
 // Types for our tables
 export type VoteRecord = {
