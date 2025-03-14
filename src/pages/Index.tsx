@@ -33,7 +33,7 @@ const Index: React.FC = () => {
               </div>
             </div>
             <h1 className="text-5xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-red-600">
-              DeepGov IRL
+              DeepGov Vote
             </h1>
             <p className="text-lg text-gray-600 mb-8">
               Vote for the AI Engine.

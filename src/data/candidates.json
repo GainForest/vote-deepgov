@@ -2,32 +2,32 @@
 [
   { 
     "id": "c1", 
-    "name": "Hello", 
-    "profilePic": "https://i.pravatar.cc/150?img=1",
-    "url": "https://example.com/candidate1"
+    "name": "Equity Max", 
+    "profilePic": "https://avatar-canvas-jet.vercel.app/_next/image?url=%2Fthumbnail%2Favatar-1.png&w=3840&q=75",
+    "url": "https://avatar-canvas-jet.vercel.app/avatar/equity"
   },
   { 
     "id": "c2", 
-    "name": "Candidate 2", 
-    "profilePic": "https://i.pravatar.cc/150?img=2",
-    "url": "https://example.com/candidate2" 
+    "name": "Community Centric", 
+    "profilePic": "https://avatar-canvas-jet.vercel.app/_next/image?url=%2Fthumbnail%2Favatar-2.png&w=3840&q=75",
+    "url": "https://avatar-canvas-jet.vercel.app/avatar/community" 
   },
   { 
     "id": "c3", 
-    "name": "Candidate 3", 
-    "profilePic": "https://i.pravatar.cc/150?img=3",
-    "url": "https://example.com/candidate3" 
+    "name": "Innovation Engine", 
+    "profilePic": "https://avatar-canvas-jet.vercel.app/_next/image?url=%2Fthumbnail%2Favatar-3.png&w=3840&q=75",
+    "url": "https://avatar-canvas-jet.vercel.app/avatar/inovation" 
   },
   { 
     "id": "c4", 
-    "name": "Candidate 4", 
-    "profilePic": "https://i.pravatar.cc/150?img=4",
-    "url": "https://example.com/candidate4" 
+    "name": "Efficient Alloc", 
+    "profilePic": "https://avatar-canvas-jet.vercel.app/_next/image?url=%2Fthumbnail%2Favatar-4.png&w=3840&q=75",
+    "url": "https://avatar-canvas-jet.vercel.app/avatar/efficiency" 
   },
   { 
     "id": "c5", 
-    "name": "Candidate 5", 
-    "profilePic": "https://i.pravatar.cc/150?img=5",
-    "url": "https://example.com/candidate5" 
+    "name": "Sustain Focus", 
+    "profilePic": "https://avatar-canvas-jet.vercel.app/_next/image?url=%2Fthumbnail%2Fpanda.png&w=3840&q=75",
+    "url": "https://avatar-canvas-jet.vercel.app/avatar/sustainability" 
   }
 ]
