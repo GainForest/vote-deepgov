@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Trophy, Medal, Award, ExternalLink } from 'lucide-react';
@@ -7,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { defaultCandidates } from '@/utils/localStorageManager';
 import { ChartContainer } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -176,6 +175,22 @@ const Leaderboard = () => {
   }, []);
 
   const prepareChartData = (historyData: VoteHistoryData[][], leaderboard: LeaderboardData[]) => {
+    if (historyData.every(history => history.length === 0)) {
+      const currentData = {
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      
+      leaderboard.forEach(candidate => {
+        const candidateInfo = defaultCandidates.find(c => c.id === candidate.candidate_id);
+        if (candidateInfo) {
+          currentData[candidateInfo.name] = Number(candidate.total_votes) || 0;
+        }
+      });
+      
+      setChartData([currentData]);
+      return;
+    }
+    
     const allTimestamps = new Set<string>();
     historyData.forEach(candidateHistory => {
       candidateHistory.forEach(dataPoint => {
@@ -184,23 +199,6 @@ const Leaderboard = () => {
     });
     
     const sortedTimestamps = Array.from(allTimestamps).sort();
-    
-    if (sortedTimestamps.length === 0) {
-      const currentData = {
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      
-      leaderboard.forEach(candidate => {
-        const candidateInfo = defaultCandidates.find(c => c.id === candidate.candidate_id);
-        const totalVotes = leaderboard.reduce((sum, c) => sum + Number(c.total_votes), 0);
-        const percentage = totalVotes > 0 ? (Number(candidate.total_votes) / totalVotes) * 100 : 0;
-        
-        currentData[candidateInfo?.name || candidate.candidate_id] = parseFloat(percentage.toFixed(1));
-      });
-      
-      setChartData([currentData]);
-      return;
-    }
     
     const formattedChartData = sortedTimestamps.map(timestamp => {
       const dataPoint: any = {
@@ -216,44 +214,48 @@ const Leaderboard = () => {
           .filter(point => point.timestamp <= timestamp)
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
         
-        if (latestVote) {
-          dataPoint[candidate.name] = latestVote.votes;
-        } else {
-          dataPoint[candidate.name] = 0;
-        }
+        dataPoint[candidate.name] = latestVote ? latestVote.votes : 0;
       });
       
       const totalVotesAtTimestamp = Object.entries(dataPoint)
         .filter(([key]) => key !== 'timestamp')
         .reduce((sum, [votes]) => sum + (Number(votes) || 0), 0);
       
-      Object.entries(dataPoint).forEach(([key, value]) => {
-        if (key !== 'timestamp') {
-          dataPoint[key] = totalVotesAtTimestamp > 0 
-            ? parseFloat((Number(value) / totalVotesAtTimestamp * 100).toFixed(1)) 
-            : 0;
-        }
-      });
+      if (totalVotesAtTimestamp > 0) {
+        Object.keys(dataPoint).forEach(key => {
+          if (key !== 'timestamp') {
+            dataPoint[key] = (Number(dataPoint[key]) / totalVotesAtTimestamp * 100).toFixed(1);
+            dataPoint[key] = parseFloat(dataPoint[key]);
+          }
+        });
+      }
       
       return dataPoint;
     });
     
-    const filteredData = formattedChartData.filter((point, index) => {
-      if (index === 0 || index === formattedChartData.length - 1) return true;
-      
-      const prev = formattedChartData[index - 1];
-      let hasChange = false;
-      
-      Object.keys(point).forEach(key => {
-        if (key !== 'timestamp' && Math.abs(point[key] - prev[key]) >= 0.5) {
-          hasChange = true;
-        }
-      });
-      
-      return hasChange;
-    });
+    if (formattedChartData.length < 2) {
+      if (formattedChartData.length === 1) {
+        const secondPoint = { ...formattedChartData[0] };
+        secondPoint.timestamp = new Date().toLocaleTimeString();
+        formattedChartData.push(secondPoint);
+      } else {
+        const currentTime = new Date();
+        
+        const point1 = { timestamp: new Date(currentTime.getTime() - 3600000).toLocaleTimeString() };
+        const point2 = { timestamp: currentTime.toLocaleTimeString() };
+        
+        defaultCandidates.forEach(candidate => {
+          const votes = leaderboardData.find(c => c.candidate_id === candidate.id)?.total_votes || 0;
+          point1[candidate.name] = 20;
+          point2[candidate.name] = votes > 0 ? 20 : 0;
+        });
+        
+        formattedChartData.push(point1, point2);
+      }
+    }
     
-    setChartData(filteredData);
+    console.log('Chart data prepared:', formattedChartData);
+    setChartData(formattedChartData);
   };
 
   const getBadge = (index: number) => {
@@ -330,8 +332,13 @@ const Leaderboard = () => {
                         votes: { theme: { light: '#3b82f6', dark: '#60a5fa' } }
                       }}
                     >
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
+                      <div style={{ width: '100%', height: '100%' }} className="recharts-responsive-container">
+                        <LineChart 
+                          width={500} 
+                          height={400} 
+                          data={chartData} 
+                          margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                           <XAxis 
                             dataKey="timestamp" 
@@ -366,11 +373,12 @@ const Leaderboard = () => {
                               strokeWidth={3}
                               dot={{ r: 4, fill: getLineColor(candidate.id), strokeWidth: 0 }}
                               activeDot={{ r: 6, strokeWidth: 0 }}
+                              isAnimationActive={true}
                               animationDuration={1500}
                             />
                           ))}
                         </LineChart>
-                      </ResponsiveContainer>
+                      </div>
                     </ChartContainer>
                   </div>
                 </ResizablePanel>
