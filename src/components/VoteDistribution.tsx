@@ -1,11 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Minus, User, RefreshCw, Save, Loader2 } from 'lucide-react';
+import { Plus, Minus, RefreshCw, Save, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Candidate, UserData, updateVotes, getUserData } from '@/utils/localStorageManager';
 import { toast } from 'sonner';
 import { saveVotes } from '@/utils/supabaseClient';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
 
 interface VoteDistributionProps {
   candidates: Candidate[];
@@ -43,6 +46,19 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
         description: "You can adjust your votes anytime"
       });
     }
+  };
+
+  const handleSliderChange = (candidateId: string, value: number[]) => {
+    if (!userData) return;
+    
+    setIsUpdating(true);
+    
+    // Update votes directly to slider value
+    const newVoteValue = value[0];
+    const updatedUserData = updateVotes(candidateId, newVoteValue);
+    
+    setUserData(updatedUserData);
+    setIsUpdating(false);
   };
 
   const resetAllVotes = () => {
@@ -90,6 +106,12 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
     }
   };
 
+  const openCandidateUrl = (url?: string) => {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   if (!userData) {
     return <div className="text-center p-10">Loading...</div>;
   }
@@ -101,58 +123,95 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
           <div className="text-sm font-medium text-gray-500">Votes Remaining</div>
           <div className="text-sm font-medium">{userData.votesRemaining} / {userData.totalVotes}</div>
         </div>
-        <Progress value={(userData.votesRemaining / userData.totalVotes) * 100} className="h-2" />
+        <Progress 
+          value={(userData.votesRemaining / userData.totalVotes) * 100} 
+          className="h-2"
+          color={userData.votesRemaining === 0 ? "bg-primary" : "bg-primary/70"}
+        />
       </div>
       
-      <div className="space-y-4">
+      <div className="space-y-6">
         {candidates.map((candidate) => (
-          <div 
+          <Card 
             key={candidate.id} 
-            className="rounded-xl p-5 border border-gray-100 bg-white shadow-sm vote-card"
+            className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300"
           >
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
+            <CardContent className="p-0">
+              <div className="p-5 bg-gradient-to-r from-violet-50 to-purple-50">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                    <AvatarImage src={candidate.profilePic} alt={candidate.name} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                      {candidate.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-lg">{candidate.name}</h3>
+                      <span className="text-xl font-bold text-primary">
+                        {userData.votes[candidate.id] || 0}
+                      </span>
+                    </div>
+                    
+                    {candidate.url && (
+                      <button 
+                        onClick={() => openCandidateUrl(candidate.url)}
+                        className="flex items-center text-xs text-primary/80 hover:text-primary transition-colors mt-1"
+                      >
+                        <span>View profile</span>
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <span className="font-medium">{candidate.name}</span>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleVoteChange(candidate.id, -1)}
+                      disabled={isUpdating || (userData.votes[candidate.id] || 0) <= 0 || isSaving}
+                      className="h-8 w-8 rounded-full bg-white shadow-sm"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="flex-1">
+                      <Slider
+                        value={[userData.votes[candidate.id] || 0]}
+                        max={userData.totalVotes}
+                        step={1}
+                        onValueChange={(value) => handleSliderChange(candidate.id, value)}
+                        disabled={isUpdating || isSaving}
+                        className="py-1"
+                      />
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleVoteChange(candidate.id, 1)}
+                      disabled={isUpdating || userData.votesRemaining <= 0 || isSaving}
+                      className="h-8 w-8 rounded-full bg-white shadow-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <Progress 
+                    value={((userData.votes[candidate.id] || 0) / userData.totalVotes) * 100} 
+                    className="h-2 bg-primary/20"
+                  />
+                </div>
               </div>
-              <div className="text-lg font-semibold">
-                {userData.votes[candidate.id] || 0}
-              </div>
-            </div>
-            
-            <div className="mt-4 flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleVoteChange(candidate.id, -1)}
-                disabled={isUpdating || (userData.votes[candidate.id] || 0) <= 0 || isSaving}
-                className="h-9 w-9 rounded-full"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              
-              <Progress 
-                value={((userData.votes[candidate.id] || 0) / userData.totalVotes) * 100} 
-                className="h-9 flex-1"
-              />
-              
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleVoteChange(candidate.id, 1)}
-                disabled={isUpdating || userData.votesRemaining <= 0 || isSaving}
-                className="h-9 w-9 rounded-full"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
       
-      <div className="pt-4 flex justify-between">
+      <div className="pt-6 flex justify-between">
         <Button 
           variant="outline" 
           onClick={resetAllVotes}

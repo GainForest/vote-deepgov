@@ -11,15 +11,42 @@ export interface UserData {
 export interface Candidate {
   id: string;
   name: string;
+  profilePic?: string;
+  url?: string;
 }
 
 // Default candidates
 export const defaultCandidates: Candidate[] = [
-  { id: 'c1', name: 'Candidate 1' },
-  { id: 'c2', name: 'Candidate 2' },
-  { id: 'c3', name: 'Candidate 3' },
-  { id: 'c4', name: 'Candidate 4' },
-  { id: 'c5', name: 'Candidate 5' },
+  { 
+    id: 'c1', 
+    name: 'Candidate 1', 
+    profilePic: 'https://i.pravatar.cc/150?img=1',
+    url: 'https://example.com/candidate1'
+  },
+  { 
+    id: 'c2', 
+    name: 'Candidate 2', 
+    profilePic: 'https://i.pravatar.cc/150?img=2',
+    url: 'https://example.com/candidate2' 
+  },
+  { 
+    id: 'c3', 
+    name: 'Candidate 3', 
+    profilePic: 'https://i.pravatar.cc/150?img=3',
+    url: 'https://example.com/candidate3' 
+  },
+  { 
+    id: 'c4', 
+    name: 'Candidate 4', 
+    profilePic: 'https://i.pravatar.cc/150?img=4',
+    url: 'https://example.com/candidate4' 
+  },
+  { 
+    id: 'c5', 
+    name: 'Candidate 5', 
+    profilePic: 'https://i.pravatar.cc/150?img=5',
+    url: 'https://example.com/candidate5' 
+  },
 ];
 
 // Local storage keys
