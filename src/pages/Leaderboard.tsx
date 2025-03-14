@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Trophy, Medal, Award, ExternalLink } from 'lucide-react';
@@ -273,11 +274,11 @@ const Leaderboard = () => {
 
   const getLineColor = (candidateId: string) => {
     const candidateColors: Record<string, string> = {
-      'candidate-1': '#3b82f6', // Blue
-      'candidate-2': '#ef4444', // Red
-      'candidate-3': '#10b981', // Green
-      'candidate-4': '#f59e0b', // Amber
-      'candidate-5': '#8b5cf6', // Purple
+      'c1': '#3b82f6', // Blue
+      'c2': '#ef4444', // Red
+      'c3': '#10b981', // Green
+      'c4': '#f59e0b', // Amber
+      'c5': '#8b5cf6', // Purple
     };
     
     return candidateColors[candidateId] || '#6b7280';
