@@ -100,59 +100,83 @@ export const loginWithName = async (
 
 // Vote functions
 export const saveVotes = async (userId: string, votes: Record<string, number>): Promise<{success: boolean; error: any}> => {
-  // Delete existing votes for this user
-  const { error: deleteError } = await supabase
-    .from('votes')
-    .delete()
-    .eq('user_id', userId);
+  console.log("Starting saveVotes function with userId:", userId);
+  console.log("Votes to save:", votes);
+  
+  try {
+    // Delete existing votes for this user
+    const { error: deleteError } = await supabase
+      .from('votes')
+      .delete()
+      .eq('user_id', userId);
 
-  if (deleteError) {
-    console.error('Error deleting existing votes:', deleteError);
-    return { success: false, error: deleteError };
-  }
+    if (deleteError) {
+      console.error('Error deleting existing votes:', deleteError);
+      return { success: false, error: deleteError };
+    }
 
-  // Prepare votes for insertion
-  const voteRecords: VoteRecord[] = Object.entries(votes)
-    .filter(([_, count]) => count > 0) // Only save non-zero votes
-    .map(([candidateId, count]) => ({
-      user_id: userId,
-      candidate_id: candidateId,
-      vote_count: count
-    }));
+    console.log("Successfully deleted existing votes");
 
-  if (voteRecords.length === 0) {
+    // Prepare votes for insertion
+    const voteRecords: VoteRecord[] = Object.entries(votes)
+      .filter(([_, count]) => count > 0) // Only save non-zero votes
+      .map(([candidateId, count]) => ({
+        user_id: userId,
+        candidate_id: candidateId,
+        vote_count: count
+      }));
+
+    console.log("Prepared vote records for insertion:", voteRecords);
+
+    if (voteRecords.length === 0) {
+      console.log("No non-zero votes to save");
+      return { success: true, error: null };
+    }
+
+    // Insert new votes
+    const { error: insertError } = await supabase
+      .from('votes')
+      .insert(voteRecords);
+
+    if (insertError) {
+      console.error('Error saving votes:', insertError);
+      return { success: false, error: insertError };
+    }
+
+    console.log("Successfully inserted new votes");
     return { success: true, error: null };
+  } catch (err) {
+    console.error("Unexpected error in saveVotes:", err);
+    return { success: false, error: err };
   }
-
-  // Insert new votes
-  const { error: insertError } = await supabase
-    .from('votes')
-    .insert(voteRecords);
-
-  if (insertError) {
-    console.error('Error saving votes:', insertError);
-    return { success: false, error: insertError };
-  }
-
-  return { success: true, error: null };
 };
 
 export const fetchUserVotes = async (userId: string): Promise<{votes: Record<string, number>; error: any}> => {
-  const { data, error } = await supabase
-    .from('votes')
-    .select('*')
-    .eq('user_id', userId);
+  try {
+    console.log("Fetching votes for user:", userId);
+    
+    const { data, error } = await supabase
+      .from('votes')
+      .select('*')
+      .eq('user_id', userId);
 
-  if (error) {
-    console.error('Error fetching votes:', error);
-    return { votes: {}, error };
+    if (error) {
+      console.error('Error fetching votes:', error);
+      return { votes: {}, error };
+    }
+
+    console.log("Fetched vote data:", data);
+    
+    // Format votes for our local state
+    const formattedVotes: Record<string, number> = {};
+    data.forEach((vote: VoteRecord) => {
+      formattedVotes[vote.candidate_id] = vote.vote_count;
+    });
+    
+    console.log("Formatted votes:", formattedVotes);
+    return { votes: formattedVotes, error: null };
+  } catch (err) {
+    console.error("Unexpected error in fetchUserVotes:", err);
+    return { votes: {}, error: err };
   }
-
-  // Format votes for our local state
-  const formattedVotes: Record<string, number> = {};
-  data.forEach((vote: VoteRecord) => {
-    formattedVotes[vote.candidate_id] = vote.vote_count;
-  });
-
-  return { votes: formattedVotes, error: null };
 };

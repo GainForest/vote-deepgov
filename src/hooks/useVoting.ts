@@ -77,19 +77,27 @@ export const useVoting = () => {
     setIsSaving(true);
     
     try {
+      console.log("Saving votes for user:", userData.id, "Votes:", userData.votes);
+      
       const { success, error } = await saveVotes(userData.id, userData.votes);
       
       if (error) {
+        console.error("Error details:", error);
         toast.error("Failed to submit votes. Please try again.");
-        console.error("Error saving votes:", error);
         return;
       }
       
       if (success) {
+        console.log("Votes saved successfully, fetching updated votes");
+        
         // Fetch the updated votes from the server to get the new updated_at timestamp
         const { votes, error: fetchError } = await fetchUserVotes(userData.id);
         
-        if (!fetchError) {
+        if (fetchError) {
+          console.error("Error fetching votes:", fetchError);
+        } else {
+          console.log("Fetched votes:", votes);
+          
           // Update local storage with the fresh data from the server
           const updatedUserData = { ...userData, votes };
           setUserData(updatedUserData);

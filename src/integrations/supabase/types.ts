@@ -67,7 +67,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      candidate_leaderboard: {
+        Row: {
+          candidate_id: string | null
+          total_votes: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
