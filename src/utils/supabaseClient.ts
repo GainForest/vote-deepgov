@@ -13,6 +13,7 @@ export type VoteRecord = {
 export type UserProfile = {
   id?: string;
   name: string;
+  pin: string;
   created_at?: string;
 };
 
@@ -31,8 +32,31 @@ export const checkNameExists = async (name: string): Promise<boolean> => {
   return data && data.length > 0;
 };
 
+// Verify pin for a user
+export const verifyPin = async (name: string, pin: string): Promise<{isValid: boolean; userId?: string}> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('id, pin')
+    .eq('name', name)
+    .single();
+
+  if (error || !data) {
+    console.error('Error verifying PIN:', error);
+    return { isValid: false };
+  }
+
+  return { 
+    isValid: data.pin === pin,
+    userId: data.id
+  };
+};
+
 // Auth functions
-export const loginWithName = async (name: string, isExistingOnly: boolean = false): Promise<{user: any; error: any}> => {
+export const loginWithName = async (
+  name: string, 
+  pin: string, 
+  isExistingOnly: boolean = false
+): Promise<{user: any; error: any}> => {
   // Check if user exists with this name
   const { data: existingUser, error: searchError } = await supabase
     .from('user_profiles')
@@ -45,8 +69,11 @@ export const loginWithName = async (name: string, isExistingOnly: boolean = fals
     return { user: null, error: searchError };
   }
 
-  // If user exists, return the first user
+  // If user exists, verify PIN
   if (existingUser && existingUser.length > 0) {
+    if (existingUser[0].pin !== pin) {
+      return { user: null, error: { message: 'INVALID_PIN' } };
+    }
     return { user: existingUser[0], error: null };
   }
 
@@ -55,10 +82,10 @@ export const loginWithName = async (name: string, isExistingOnly: boolean = fals
     return { user: null, error: { message: 'NAME_NOT_FOUND' } };
   }
 
-  // Create a new user profile
+  // Create a new user profile with the PIN
   const { data: newUser, error: createError } = await supabase
     .from('user_profiles')
-    .insert([{ name }])
+    .insert([{ name, pin }])
     .select();
 
   if (createError) {
