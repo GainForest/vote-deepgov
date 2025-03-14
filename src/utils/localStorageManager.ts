@@ -1,6 +1,7 @@
 
 // Types
 export interface UserData {
+  id?: string;
   name: string;
   votes: Record<string, number>;
   totalVotes: number;
@@ -26,7 +27,7 @@ const STORAGE_KEY = 'voting_app_user_data';
 const TOTAL_VOTES = 100;
 
 // Initialize user data with defaults
-export function initializeUserData(name: string): UserData {
+export function initializeUserData(name: string, userId?: string): UserData {
   const initialVotes: Record<string, number> = {};
   
   // Initialize all candidates with zero votes
@@ -35,6 +36,7 @@ export function initializeUserData(name: string): UserData {
   });
 
   const userData: UserData = {
+    id: userId,
     name,
     votes: initialVotes,
     totalVotes: TOTAL_VOTES,
@@ -93,4 +95,28 @@ export function updateVotes(candidateId: string, voteCount: number): UserData | 
 // Clear user data from local storage
 export function clearUserData(): void {
   localStorage.removeItem(STORAGE_KEY);
+}
+
+// Import votes from Supabase to local storage
+export function importVotesFromSupabase(userData: UserData, votes: Record<string, number>): UserData {
+  // Create a new user data object with the votes from Supabase
+  const updatedUserData = { ...userData };
+  
+  // Initialize all votes to zero first
+  defaultCandidates.forEach(candidate => {
+    updatedUserData.votes[candidate.id] = 0;
+  });
+  
+  // Update with actual votes
+  Object.entries(votes).forEach(([candidateId, count]) => {
+    updatedUserData.votes[candidateId] = count;
+  });
+  
+  // Recalculate remaining votes
+  updatedUserData.votesRemaining = updatedUserData.totalVotes - 
+    Object.values(updatedUserData.votes).reduce((sum, votes) => sum + votes, 0);
+  
+  // Save to local storage
+  saveUserData(updatedUserData);
+  return updatedUserData;
 }

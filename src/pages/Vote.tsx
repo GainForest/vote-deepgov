@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 const Vote = () => {
   const [userName, setUserName] = useState<string>('');
+  const [userId, setUserId] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +22,9 @@ const Vote = () => {
     }
     
     setUserName(userData.name);
+    if (userData.id) {
+      setUserId(userData.id);
+    }
   }, [navigate]);
 
   const handleLogout = () => {
@@ -66,6 +70,7 @@ const Vote = () => {
             
             <p className="text-gray-500">
               You have 100 total votes to distribute among the candidates.
+              Remember to submit your votes when you're done!
             </p>
           </div>
           

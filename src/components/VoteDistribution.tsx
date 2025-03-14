@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Minus, User, RefreshCw } from 'lucide-react';
+import { Plus, Minus, User, RefreshCw, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Candidate, UserData, updateVotes, getUserData, clearUserData } from '@/utils/localStorageManager';
+import { Candidate, UserData, updateVotes, getUserData } from '@/utils/localStorageManager';
 import { toast } from 'sonner';
+import { saveVotes } from '@/utils/supabaseClient';
 
 interface VoteDistributionProps {
   candidates: Candidate[];
@@ -13,6 +14,7 @@ interface VoteDistributionProps {
 const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     // Load user data from localStorage
@@ -60,6 +62,34 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
     toast.success("Votes reset successfully");
   };
 
+  const handleSubmitVotes = async () => {
+    if (!userData || !userData.id) {
+      toast.error("User information missing. Please log in again.");
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      const { success, error } = await saveVotes(userData.id, userData.votes);
+      
+      if (error) {
+        toast.error("Failed to submit votes. Please try again.");
+        console.error("Error saving votes:", error);
+        return;
+      }
+      
+      if (success) {
+        toast.success("Your votes have been submitted successfully!");
+      }
+    } catch (err) {
+      console.error("Error submitting votes:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!userData) {
     return <div className="text-center p-10">Loading...</div>;
   }
@@ -97,7 +127,7 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
                 variant="outline"
                 size="icon"
                 onClick={() => handleVoteChange(candidate.id, -1)}
-                disabled={isUpdating || (userData.votes[candidate.id] || 0) <= 0}
+                disabled={isUpdating || (userData.votes[candidate.id] || 0) <= 0 || isSaving}
                 className="h-9 w-9 rounded-full"
               >
                 <Minus className="h-4 w-4" />
@@ -112,7 +142,7 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
                 variant="outline"
                 size="icon"
                 onClick={() => handleVoteChange(candidate.id, 1)}
-                disabled={isUpdating || userData.votesRemaining <= 0}
+                disabled={isUpdating || userData.votesRemaining <= 0 || isSaving}
                 className="h-9 w-9 rounded-full"
               >
                 <Plus className="h-4 w-4" />
@@ -122,14 +152,33 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
         ))}
       </div>
       
-      <div className="pt-4 flex justify-center">
+      <div className="pt-4 flex justify-between">
         <Button 
           variant="outline" 
           onClick={resetAllVotes}
           className="gap-2"
+          disabled={isSaving}
         >
           <RefreshCw className="h-4 w-4" />
           Reset All Votes
+        </Button>
+        
+        <Button 
+          onClick={handleSubmitVotes}
+          className="gap-2"
+          disabled={isSaving || Object.values(userData.votes).every(v => v === 0)}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4" />
+              Submit Votes
+            </>
+          )}
         </Button>
       </div>
     </div>
