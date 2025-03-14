@@ -33,31 +33,31 @@ const Index: React.FC = () => {
               </div>
             </div>
             <h1 className="text-5xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-red-600">
-              Election Center
+              DeepGov IRL
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Your vote matters in shaping our future
+              Vote for the AI Engine.
             </p>
           </div>
           
           <div className="grid gap-4">
             <Button size="lg" className="w-full" onClick={handleVoteClick}>
               <Vote className="mr-2 h-5 w-5" />
-              Cast Your Votes (with Profile)
+              Cast Your Votes
               <ChevronRight className="ml-auto h-5 w-5" />
             </Button>
             
             <Link to="/leaderboard">
               <Button size="lg" variant="secondary" className="w-full">
                 <BarChart3 className="mr-2 h-5 w-5" />
-                View Election Results
+                View Voting Results
                 <ChevronRight className="ml-auto h-5 w-5" />
               </Button>
             </Link>
           </div>
           
           <p className="text-sm text-gray-500 mt-8">
-            A secure voting platform with real-time result tracking
+            A Deep Governance Voting Platform for the Future
           </p>
         </div>
       </main>

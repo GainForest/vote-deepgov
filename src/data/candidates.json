@@ -2,7 +2,7 @@
 [
   { 
     "id": "c1", 
-    "name": "Candidate 1", 
+    "name": "Hello", 
     "profilePic": "https://i.pravatar.cc/150?img=1",
     "url": "https://example.com/candidate1"
   },

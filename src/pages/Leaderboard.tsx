@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Trophy, Medal, Award, ExternalLink } from 'lucide-react';
@@ -7,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { defaultCandidates } from '@/utils/localStorageManager';
 import { ChartContainer } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -308,7 +307,7 @@ const Leaderboard = () => {
             <div className="bg-blue-100 border-l-4 border-blue-600 px-4 py-2 mb-6 rounded-r">
               <h1 className="text-3xl font-bold mb-3 text-blue-900">OFFICIAL ELECTION RESULTS</h1>
               <p className="text-blue-800">
-                Live polling data from all voting districts. Results update in real-time as votes are tallied.
+                Results update in real-time as votes are tallied.
               </p>
             </div>
           </div>
@@ -318,38 +317,35 @@ const Leaderboard = () => {
               <div className="animate-pulse-light text-primary font-medium">Counting votes...</div>
             </div>
           ) : (
-            <>
-              <ResizablePanelGroup 
-                direction="horizontal" 
-                className="min-h-[600px] rounded-lg border"
-              >
-                <ResizablePanel defaultSize={55} className="bg-white p-4">
+            <div>
+              {/* Mobile Layout - Only visible on screens smaller than lg breakpoint */}
+              <div className="space-y-6 lg:hidden">
+                <div className="bg-white p-4 rounded-lg border">
                   <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
-                    Polling Trends Over Time (%)
+                    Voting Over Time (%)
                   </h2>
-                  <div className="h-[500px] w-full">
+                  <div className="h-[400px] w-full">
                     <ChartContainer
                       config={{
                         votes: { theme: { light: '#3b82f6', dark: '#60a5fa' } }
                       }}
                     >
-                      <div style={{ width: '100%', height: '100%' }} className="recharts-responsive-container">
+                      <ResponsiveContainer width="100%" height="100%">
                         <LineChart 
-                          width={500} 
-                          height={400} 
                           data={chartData} 
-                          margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
+                          margin={{ top: 10, right: 20, left: 5, bottom: 30 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                           <XAxis 
                             dataKey="timestamp" 
-                            label={{ value: 'Time', position: 'insideBottomRight', offset: 0 }}
-                            tick={{ fontSize: 12 }}
+                            tick={{ fontSize: 10 }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={50}
                           />
                           <YAxis 
-                            label={{ value: 'Support (%)', angle: -90, position: 'insideLeft' }}
                             domain={[0, 100]}
-                            tick={{ fontSize: 12 }}
+                            tick={{ fontSize: 10 }}
                           />
                           <Tooltip 
                             formatter={(value: number) => [`${value}%`, '']}
@@ -364,6 +360,7 @@ const Leaderboard = () => {
                             verticalAlign="bottom" 
                             height={36} 
                             iconType="circle"
+                            wrapperStyle={{ fontSize: '10px' }}
                           />
                           {defaultCandidates.map((candidate) => (
                             <Line
@@ -371,26 +368,24 @@ const Leaderboard = () => {
                               type="monotone"
                               dataKey={candidate.name}
                               stroke={getLineColor(candidate.id)}
-                              strokeWidth={3}
-                              dot={{ r: 4, fill: getLineColor(candidate.id), strokeWidth: 0 }}
-                              activeDot={{ r: 6, strokeWidth: 0 }}
+                              strokeWidth={2}
+                              dot={{ r: 3, fill: getLineColor(candidate.id), strokeWidth: 0 }}
+                              activeDot={{ r: 5, strokeWidth: 0 }}
                               isAnimationActive={true}
                               animationDuration={1500}
                             />
                           ))}
                         </LineChart>
-                      </div>
+                      </ResponsiveContainer>
                     </ChartContainer>
                   </div>
-                </ResizablePanel>
-                
-                <ResizableHandle withHandle />
-                
-                <ResizablePanel defaultSize={45} className="bg-white p-4">
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border">
                   <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
                     Current Standings
                   </h2>
-                  <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100% - 60px)' }}>
+                  <div className="space-y-4">
                     {leaderboardData.length === 0 ? (
                       <div className="text-center p-10 border border-dashed rounded-lg">
                         <p className="text-gray-500">No votes have been cast yet!</p>
@@ -466,9 +461,160 @@ const Leaderboard = () => {
                       })
                     )}
                   </div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </>
+                </div>
+              </div>
+
+              {/* Desktop Layout - Only visible on lg screens and above */}
+              <div className="hidden lg:block">
+                <ResizablePanelGroup 
+                  direction="horizontal" 
+                  className="min-h-[600px] rounded-lg border"
+                >
+                  <ResizablePanel defaultSize={55} className="bg-white p-4">
+                    <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
+                      Voting Over Time (%)
+                    </h2>
+                    <div className="h-[500px] w-full">
+                      <ChartContainer
+                        config={{
+                          votes: { theme: { light: '#3b82f6', dark: '#60a5fa' } }
+                        }}
+                      >
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart 
+                            data={chartData} 
+                            margin={{ top: 10, right: 30, left: 10, bottom: 30 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                            <XAxis 
+                              dataKey="timestamp" 
+                              label={{ value: 'Time', position: 'insideBottomRight', offset: 0 }}
+                              tick={{ fontSize: 12 }}
+                            />
+                            <YAxis 
+                              label={{ value: 'Support (%)', angle: -90, position: 'insideLeft' }}
+                              domain={[0, 100]}
+                              tick={{ fontSize: 12 }}
+                            />
+                            <Tooltip 
+                              formatter={(value: number) => [`${value}%`, '']}
+                              labelFormatter={(label) => `Time: ${label}`}
+                              contentStyle={{ 
+                                borderRadius: '8px', 
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                                border: '1px solid #e2e8f0' 
+                              }}
+                            />
+                            <Legend 
+                              verticalAlign="bottom" 
+                              height={36} 
+                              iconType="circle"
+                            />
+                            {defaultCandidates.map((candidate) => (
+                              <Line
+                                key={candidate.id}
+                                type="monotone"
+                                dataKey={candidate.name}
+                                stroke={getLineColor(candidate.id)}
+                                strokeWidth={3}
+                                dot={{ r: 4, fill: getLineColor(candidate.id), strokeWidth: 0 }}
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                                isAnimationActive={true}
+                                animationDuration={1500}
+                              />
+                            ))}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </ChartContainer>
+                    </div>
+                  </ResizablePanel>
+                  
+                  <ResizableHandle withHandle />
+                  
+                  <ResizablePanel defaultSize={45} className="bg-white p-4">
+                    <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
+                      Current Standings
+                    </h2>
+                    <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100% - 60px)' }}>
+                      {leaderboardData.length === 0 ? (
+                        <div className="text-center p-10 border border-dashed rounded-lg">
+                          <p className="text-gray-500">No votes have been cast yet!</p>
+                          <p className="text-sm text-gray-400 mt-2">Be the first to vote for your favorite candidates.</p>
+                        </div>
+                      ) : (
+                        leaderboardData.map((item, index) => {
+                          const candidate = defaultCandidates.find(c => c.id === item.candidate_id);
+                          const votePercentage = maxVotes ? (Number(item.total_votes) / maxVotes) * 100 : 0;
+                          
+                          return (
+                            <Card 
+                              key={item.candidate_id} 
+                              className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                            >
+                              <CardContent className="p-0">
+                                <div className="p-4 bg-gradient-to-r from-gray-50 to-white">
+                                  <div className="flex items-center gap-4 mb-3">
+                                    <div className="flex-shrink-0">
+                                      {getBadge(index)}
+                                    </div>
+                                    
+                                    <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                                      <AvatarImage src={candidate?.profilePic} alt={candidate?.name} />
+                                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                        {candidate?.name.substring(0, 2).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    
+                                    <div className="flex-1">
+                                      <div className="flex items-center justify-between">
+                                        <h3 className="font-semibold">{candidate?.name || item.candidate_id}</h3>
+                                        <span className="text-lg font-bold" style={{ color: getLineColor(item.candidate_id) }}>
+                                          {item.total_votes || 0}
+                                        </span>
+                                      </div>
+                                      
+                                      {candidate?.url && (
+                                        <button 
+                                          onClick={() => openCandidateUrl(candidate.url)}
+                                          className="flex items-center text-xs text-primary/80 hover:text-primary transition-colors mt-1"
+                                        >
+                                          <span>View profile</span>
+                                          <ExternalLink className="ml-1 h-3 w-3" />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="space-y-1">
+                                    <Progress 
+                                      value={votePercentage} 
+                                      className="h-2 bg-gray-100"
+                                      style={{ 
+                                        '--progress-background': 'transparent',
+                                        '--progress-foreground': getLineColor(item.candidate_id) 
+                                      } as React.CSSProperties}
+                                    />
+                                    
+                                    <div className="flex justify-between">
+                                      <span className="text-xs font-medium text-gray-500">
+                                        Position #{index + 1}
+                                      </span>
+                                      <span className="text-xs font-medium text-gray-500">
+                                        {votePercentage.toFixed(1)}% of total votes
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })
+                      )}
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </div>
+            </div>
           )}
         </div>
       </main>

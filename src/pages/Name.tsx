@@ -27,9 +27,6 @@ const Name: React.FC = () => {
       <main className="flex-1 flex flex-col p-6 md:p-8 max-w-3xl mx-auto w-full">
         <div className="w-full animate-fade-in">
           <div className="mb-8">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-2 animate-slide-up">
-              STEP 1 OF 2
-            </div>
             <h1 className="text-3xl font-semibold mb-4">Set Up Your Profile</h1>
             <p className="text-gray-600">
               Create a profile or log in with an existing one to cast your votes.
