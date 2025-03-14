@@ -1,51 +1,63 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UserPlus, Vote, ChevronRight, BarChart3 } from 'lucide-react';
+import { Vote, BarChart3, ChevronRight } from 'lucide-react';
+import { getUserData } from '@/utils/localStorageManager';
+import { toast } from 'sonner';
 
 const Index: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleVoteClick = () => {
+    const userData = getUserData();
+    if (!userData) {
+      toast.info('Please create your profile before voting', {
+        description: 'You need to set up your voting profile first',
+        duration: 5000,
+      });
+      navigate('/name');
+      return;
+    }
+    navigate('/vote');
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-violet-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-red-50">
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="max-w-md w-full space-y-8 text-center animate-fade-in">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-              Voting App
+            <div className="mb-6 flex justify-center">
+              <div className="rounded-full bg-white p-3 shadow-md">
+                <Vote className="h-12 w-12 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-red-600">
+              Election Center
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Cast your votes for your favorite candidates
+              Your vote matters in shaping our future
             </p>
           </div>
           
           <div className="grid gap-4">
-            <Link to="/name">
-              <Button size="lg" className="w-full">
-                <UserPlus className="mr-2 h-5 w-5" />
-                Create Profile
-                <ChevronRight className="ml-auto h-5 w-5" />
-              </Button>
-            </Link>
-            
-            <Link to="/vote">
-              <Button size="lg" variant="secondary" className="w-full">
-                <Vote className="mr-2 h-5 w-5" />
-                Cast Your Votes
-                <ChevronRight className="ml-auto h-5 w-5" />
-              </Button>
-            </Link>
+            <Button size="lg" className="w-full" onClick={handleVoteClick}>
+              <Vote className="mr-2 h-5 w-5" />
+              Cast Your Votes (with Profile)
+              <ChevronRight className="ml-auto h-5 w-5" />
+            </Button>
             
             <Link to="/leaderboard">
-              <Button size="lg" variant="outline" className="w-full">
+              <Button size="lg" variant="secondary" className="w-full">
                 <BarChart3 className="mr-2 h-5 w-5" />
-                View Leaderboard
+                View Election Results
                 <ChevronRight className="ml-auto h-5 w-5" />
               </Button>
             </Link>
           </div>
           
           <p className="text-sm text-gray-500 mt-8">
-            A simple voting application with real-time updates
+            A secure voting platform with real-time result tracking
           </p>
         </div>
       </main>
