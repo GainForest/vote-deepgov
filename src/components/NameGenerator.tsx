@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRandomAnimalName } from '@/utils/animalNames';
 import CreateProfileForm from './name-generator/CreateProfileForm';
 import LoginForm from './name-generator/LoginForm';
+import { generateAvatarUrl } from '@/utils/avatarUtils';
 
 const NameGenerator: React.FC = () => {
   const [name, setName] = useState('');

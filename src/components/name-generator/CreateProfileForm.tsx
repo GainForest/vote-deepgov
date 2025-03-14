@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { generateAvatarUrl } from '@/utils/avatarUtils';
 
 // Form validation schema
 const formSchema = z.object({
@@ -32,6 +34,7 @@ const CreateProfileForm: React.FC<CreateProfileFormProps> = ({
   isLoggingIn 
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const navigate = useNavigate();
   
   // Create form for new profile
@@ -44,8 +47,9 @@ const CreateProfileForm: React.FC<CreateProfileFormProps> = ({
   });
 
   useEffect(() => {
-    // When initialName changes, update the form
+    // When initialName changes, update the form and avatar
     form.setValue("name", initialName);
+    setAvatarUrl(generateAvatarUrl(initialName));
   }, [initialName, form]);
 
   const generateRandomName = () => {
@@ -62,6 +66,7 @@ const CreateProfileForm: React.FC<CreateProfileFormProps> = ({
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
     onNameChange(newName);
+    setAvatarUrl(generateAvatarUrl(newName));
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -80,8 +85,8 @@ const CreateProfileForm: React.FC<CreateProfileFormProps> = ({
         return;
       }
       
-      // Initialize local user data
-      initializeUserData(values.name.trim(), user.id);
+      // Initialize local user data with avatar URL
+      initializeUserData(values.name.trim(), user.id, avatarUrl);
       
       toast.success(`Welcome, ${values.name}!`);
       
@@ -96,6 +101,16 @@ const CreateProfileForm: React.FC<CreateProfileFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex flex-col items-center mb-6">
+          <Avatar className="h-24 w-24 border-2 border-white shadow-md mb-4">
+            <AvatarImage src={avatarUrl} alt="Profile avatar" />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {initialName.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <p className="text-sm text-gray-500">Your randomly generated avatar</p>
+        </div>
+        
         <FormField
           control={form.control}
           name="name"

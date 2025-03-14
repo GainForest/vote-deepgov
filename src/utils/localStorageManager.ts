@@ -6,6 +6,7 @@ export interface UserData {
   votes: Record<string, number>;
   totalVotes: number;
   votesRemaining: number;
+  avatarUrl?: string;
 }
 
 export interface Candidate {
@@ -54,7 +55,7 @@ const STORAGE_KEY = 'voting_app_user_data';
 const TOTAL_VOTES = 100;
 
 // Initialize user data with defaults
-export function initializeUserData(name: string, userId?: string): UserData {
+export function initializeUserData(name: string, userId?: string, avatarUrl?: string): UserData {
   const initialVotes: Record<string, number> = {};
   
   // Initialize all candidates with zero votes
@@ -67,7 +68,8 @@ export function initializeUserData(name: string, userId?: string): UserData {
     name,
     votes: initialVotes,
     totalVotes: TOTAL_VOTES,
-    votesRemaining: TOTAL_VOTES
+    votesRemaining: TOTAL_VOTES,
+    avatarUrl
   };
 
   saveUserData(userData);

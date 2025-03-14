@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const Vote = () => {
   const [userName, setUserName] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +26,9 @@ const Vote = () => {
     setUserName(userData.name);
     if (userData.id) {
       setUserId(userData.id);
+    }
+    if (userData.avatarUrl) {
+      setAvatarUrl(userData.avatarUrl);
     }
   }, [navigate]);
 
@@ -63,6 +67,7 @@ const Vote = () => {
             {userName && (
               <div className="flex items-center gap-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 mb-6">
                 <Avatar className="h-10 w-10 border-2 border-white">
+                  <AvatarImage src={avatarUrl} alt={userName} />
                   <AvatarFallback className="bg-primary/10 text-primary">
                     {userName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
