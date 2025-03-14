@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Candidate, UserData, updateVotes, getUserData } from '@/utils/localStorageManager';
 import { toast } from 'sonner';
-import { saveVotes } from '@/utils/supabaseClient';
+import { saveVotes, fetchUserVotes } from '@/utils/supabaseClient';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -96,6 +96,16 @@ const VoteDistribution: React.FC<VoteDistributionProps> = ({ candidates }) => {
       }
       
       if (success) {
+        // Fetch the updated votes from the server to get the new updated_at timestamp
+        const { votes, error: fetchError } = await fetchUserVotes(userData.id);
+        
+        if (!fetchError) {
+          // Update local storage with the fresh data from the server
+          const updatedUserData = { ...userData, votes };
+          setUserData(updatedUserData);
+          localStorage.setItem('voting_app_user_data', JSON.stringify(updatedUserData));
+        }
+        
         toast.success("Your votes have been submitted successfully!");
       }
     } catch (err) {
