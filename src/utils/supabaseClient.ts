@@ -22,32 +22,32 @@ export const loginWithName = async (name: string): Promise<{user: any; error: an
   const { data: existingUser, error: searchError } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('name', name)
-    .single();
+    .eq('name', name);
 
-  if (searchError && searchError.code !== 'PGNF') {
+  // Handle search errors, but ignore "no rows returned" error
+  if (searchError && searchError.code !== 'PGRST116') {
     console.error('Error searching for user:', searchError);
     return { user: null, error: searchError };
   }
 
-  // If user exists, return user
-  if (existingUser) {
-    return { user: existingUser, error: null };
+  // If user exists, return the first user
+  if (existingUser && existingUser.length > 0) {
+    return { user: existingUser[0], error: null };
   }
 
   // Create a new user profile
   const { data: newUser, error: createError } = await supabase
     .from('user_profiles')
     .insert([{ name }])
-    .select()
-    .single();
+    .select();
 
   if (createError) {
     console.error('Error creating user:', createError);
     return { user: null, error: createError };
   }
 
-  return { user: newUser, error: null };
+  // Return the first item from the array
+  return { user: newUser && newUser.length > 0 ? newUser[0] : null, error: null };
 };
 
 // Vote functions
