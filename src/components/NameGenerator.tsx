@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getRandomAnimalName } from '@/utils/animalNames';
 import { initializeUserData } from '@/utils/localStorageManager';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const NameGenerator: React.FC = () => {
   const [name, setName] = useState('');

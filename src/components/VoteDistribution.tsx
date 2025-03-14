@@ -4,7 +4,7 @@ import { Plus, Minus, User, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Candidate, UserData, updateVotes, getUserData, clearUserData } from '@/utils/localStorageManager';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface VoteDistributionProps {
   candidates: Candidate[];

@@ -5,7 +5,7 @@ import { ChevronLeft, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VoteDistribution from '@/components/VoteDistribution';
 import { defaultCandidates, getUserData, clearUserData } from '@/utils/localStorageManager';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const Vote = () => {
   const [userName, setUserName] = useState<string>('');
