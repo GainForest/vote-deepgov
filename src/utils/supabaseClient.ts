@@ -16,8 +16,23 @@ export type UserProfile = {
   created_at?: string;
 };
 
+// Check if a name exists in the database
+export const checkNameExists = async (name: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('name', name);
+
+  if (error) {
+    console.error('Error checking if name exists:', error);
+    return false;
+  }
+
+  return data && data.length > 0;
+};
+
 // Auth functions
-export const loginWithName = async (name: string): Promise<{user: any; error: any}> => {
+export const loginWithName = async (name: string, isExistingOnly: boolean = false): Promise<{user: any; error: any}> => {
   // Check if user exists with this name
   const { data: existingUser, error: searchError } = await supabase
     .from('user_profiles')
@@ -33,6 +48,11 @@ export const loginWithName = async (name: string): Promise<{user: any; error: an
   // If user exists, return the first user
   if (existingUser && existingUser.length > 0) {
     return { user: existingUser[0], error: null };
+  }
+
+  // If we're only looking for existing profiles and none found, return error
+  if (isExistingOnly) {
+    return { user: null, error: { message: 'NAME_NOT_FOUND' } };
   }
 
   // Create a new user profile

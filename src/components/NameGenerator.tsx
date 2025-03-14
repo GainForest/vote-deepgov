@@ -7,13 +7,15 @@ import { Input } from '@/components/ui/input';
 import { getRandomAnimalName } from '@/utils/animalNames';
 import { initializeUserData, importVotesFromSupabase } from '@/utils/localStorageManager';
 import { toast } from 'sonner';
-import { loginWithName, fetchUserVotes } from '@/utils/supabaseClient';
+import { loginWithName, fetchUserVotes, checkNameExists } from '@/utils/supabaseClient';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const NameGenerator: React.FC = () => {
   const [name, setName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Generate a random name on first load
@@ -34,6 +36,10 @@ const NameGenerator: React.FC = () => {
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
+    // Clear any previous error when user types
+    if (loginError) {
+      setLoginError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,14 +51,32 @@ const NameGenerator: React.FC = () => {
     }
     
     setIsLoggingIn(true);
+    setLoginError(null);
     
     try {
+      const isExistingProfile = e.currentTarget.getAttribute('data-tab') === 'existing';
+      
+      if (isExistingProfile) {
+        // Check if the name exists first for login attempts
+        const nameExists = await checkNameExists(name.trim());
+        
+        if (!nameExists) {
+          setLoginError(`Profile "${name.trim()}" doesn't exist. Please try another name or create a new profile.`);
+          setIsLoggingIn(false);
+          return;
+        }
+      }
+      
       // Login or register with Supabase
-      const { user, error } = await loginWithName(name.trim());
+      const { user, error } = await loginWithName(name.trim(), isExistingProfile);
       
       if (error) {
-        toast.error('Error logging in. Please try again.');
-        console.error('Login error:', error);
+        if (error.message === 'NAME_NOT_FOUND' && isExistingProfile) {
+          setLoginError(`Profile "${name.trim()}" doesn't exist. Please try another name or create a new profile.`);
+        } else {
+          toast.error('Error logging in. Please try again.');
+          console.error('Login error:', error);
+        }
         setIsLoggingIn(false);
         return;
       }
@@ -104,7 +128,7 @@ const NameGenerator: React.FC = () => {
         </TabsList>
         
         <TabsContent value="new">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} data-tab="new" className="space-y-4">
             <div className="relative">
               <Input
                 type="text"
@@ -145,7 +169,7 @@ const NameGenerator: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="existing">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} data-tab="existing" className="space-y-4">
             <div>
               <Input
                 type="text"
@@ -159,6 +183,12 @@ const NameGenerator: React.FC = () => {
                 Enter the exact name you used previously to access your profile and votes.
               </p>
             </div>
+            
+            {loginError && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            )}
             
             <Button 
               type="submit" 
