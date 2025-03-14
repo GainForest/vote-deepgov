@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Trophy, Medal, Award, ExternalLink } from 'lucide-react';
@@ -9,6 +10,7 @@ import { ChartContainer } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 interface LeaderboardData {
   candidate_id: string;
@@ -269,11 +271,11 @@ const Leaderboard = () => {
 
   const getLineColor = (candidateId: string) => {
     const candidateColors: Record<string, string> = {
-      'candidate-1': '#3b82f6',
-      'candidate-2': '#ef4444',
-      'candidate-3': '#10b981',
-      'candidate-4': '#f59e0b',
-      'candidate-5': '#8b5cf6',
+      'candidate-1': '#3b82f6', // Blue
+      'candidate-2': '#ef4444', // Red
+      'candidate-3': '#10b981', // Green
+      'candidate-4': '#f59e0b', // Amber
+      'candidate-5': '#8b5cf6', // Purple
     };
     
     return candidateColors[candidateId] || '#6b7280';
@@ -297,7 +299,7 @@ const Leaderboard = () => {
         </div>
       </header>
       
-      <main className="flex-1 flex flex-col p-6 md:p-8 max-w-4xl mx-auto w-full">
+      <main className="flex-1 flex flex-col p-6 md:p-8 max-w-7xl mx-auto w-full">
         <div className="w-full animate-fade-in">
           <div className="mb-8">
             <div className="bg-blue-100 border-l-4 border-blue-600 px-4 py-2 mb-6 rounded-r">
@@ -314,121 +316,149 @@ const Leaderboard = () => {
             </div>
           ) : (
             <>
-              <Card className="mb-8 p-4 border-2 border-gray-200 bg-white shadow-md">
-                <CardContent>
-                  <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide">Polling Trends Over Time (%)</h2>
-                  <div className="h-64 w-full">
+              <ResizablePanelGroup 
+                direction="horizontal" 
+                className="min-h-[600px] rounded-lg border"
+              >
+                <ResizablePanel defaultSize={55} className="bg-white p-4">
+                  <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
+                    Polling Trends Over Time (%)
+                  </h2>
+                  <div className="h-[500px] w-full">
                     <ChartContainer
                       config={{
                         votes: { theme: { light: '#3b82f6', dark: '#60a5fa' } }
                       }}
                     >
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 5, bottom: 5 }}>
+                        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 30 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                           <XAxis 
                             dataKey="timestamp" 
                             label={{ value: 'Time', position: 'insideBottomRight', offset: 0 }}
+                            tick={{ fontSize: 12 }}
                           />
                           <YAxis 
                             label={{ value: 'Support (%)', angle: -90, position: 'insideLeft' }}
                             domain={[0, 100]}
+                            tick={{ fontSize: 12 }}
                           />
                           <Tooltip 
                             formatter={(value: number) => [`${value}%`, '']}
                             labelFormatter={(label) => `Time: ${label}`}
+                            contentStyle={{ 
+                              borderRadius: '8px', 
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                              border: '1px solid #e2e8f0' 
+                            }}
                           />
-                          <Legend />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36} 
+                            iconType="circle"
+                          />
                           {defaultCandidates.map((candidate) => (
                             <Line
                               key={candidate.id}
                               type="monotone"
                               dataKey={candidate.name}
                               stroke={getLineColor(candidate.id)}
-                              strokeWidth={2}
-                              dot={{ r: 4 }}
-                              activeDot={{ r: 6 }}
+                              strokeWidth={3}
+                              dot={{ r: 4, fill: getLineColor(candidate.id), strokeWidth: 0 }}
+                              activeDot={{ r: 6, strokeWidth: 0 }}
+                              animationDuration={1500}
                             />
                           ))}
                         </LineChart>
                       </ResponsiveContainer>
                     </ChartContainer>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <div className="space-y-4">
-                {leaderboardData.length === 0 ? (
-                  <div className="text-center p-10 border border-dashed rounded-lg">
-                    <p className="text-gray-500">No votes have been cast yet!</p>
-                    <p className="text-sm text-gray-400 mt-2">Be the first to vote for your favorite candidates.</p>
-                  </div>
-                ) : (
-                  leaderboardData.map((item, index) => {
-                    const candidate = defaultCandidates.find(c => c.id === item.candidate_id);
-                    const votePercentage = maxVotes ? (Number(item.total_votes) / maxVotes) * 100 : 0;
-                    
-                    return (
-                      <Card 
-                        key={item.candidate_id} 
-                        className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300"
-                      >
-                        <CardContent className="p-0">
-                          <div className="p-5 bg-gradient-to-r from-violet-50 to-purple-50">
-                            <div className="flex items-center gap-4 mb-4">
-                              <div className="flex-shrink-0">
-                                {getBadge(index)}
-                              </div>
-                              
-                              <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
-                                <AvatarImage src={candidate?.profilePic} alt={candidate?.name} />
-                                <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                                  {candidate?.name.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <h3 className="font-semibold text-lg">{candidate?.name || item.candidate_id}</h3>
-                                  <span className="text-xl font-bold text-primary">
-                                    {item.total_votes || 0}
-                                  </span>
+                </ResizablePanel>
+                
+                <ResizableHandle withHandle />
+                
+                <ResizablePanel defaultSize={45} className="bg-white p-4">
+                  <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-wide border-b pb-3">
+                    Current Standings
+                  </h2>
+                  <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100% - 60px)' }}>
+                    {leaderboardData.length === 0 ? (
+                      <div className="text-center p-10 border border-dashed rounded-lg">
+                        <p className="text-gray-500">No votes have been cast yet!</p>
+                        <p className="text-sm text-gray-400 mt-2">Be the first to vote for your favorite candidates.</p>
+                      </div>
+                    ) : (
+                      leaderboardData.map((item, index) => {
+                        const candidate = defaultCandidates.find(c => c.id === item.candidate_id);
+                        const votePercentage = maxVotes ? (Number(item.total_votes) / maxVotes) * 100 : 0;
+                        
+                        return (
+                          <Card 
+                            key={item.candidate_id} 
+                            className="overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+                          >
+                            <CardContent className="p-0">
+                              <div className="p-4 bg-gradient-to-r from-gray-50 to-white">
+                                <div className="flex items-center gap-4 mb-3">
+                                  <div className="flex-shrink-0">
+                                    {getBadge(index)}
+                                  </div>
+                                  
+                                  <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                                    <AvatarImage src={candidate?.profilePic} alt={candidate?.name} />
+                                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                      {candidate?.name.substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <h3 className="font-semibold">{candidate?.name || item.candidate_id}</h3>
+                                      <span className="text-lg font-bold" style={{ color: getLineColor(item.candidate_id) }}>
+                                        {item.total_votes || 0}
+                                      </span>
+                                    </div>
+                                    
+                                    {candidate?.url && (
+                                      <button 
+                                        onClick={() => openCandidateUrl(candidate.url)}
+                                        className="flex items-center text-xs text-primary/80 hover:text-primary transition-colors mt-1"
+                                      >
+                                        <span>View profile</span>
+                                        <ExternalLink className="ml-1 h-3 w-3" />
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                                 
-                                {candidate?.url && (
-                                  <button 
-                                    onClick={() => openCandidateUrl(candidate.url)}
-                                    className="flex items-center text-xs text-primary/80 hover:text-primary transition-colors mt-1"
-                                  >
-                                    <span>View profile</span>
-                                    <ExternalLink className="ml-1 h-3 w-3" />
-                                  </button>
-                                )}
+                                <div className="space-y-1">
+                                  <Progress 
+                                    value={votePercentage} 
+                                    className="h-2 bg-gray-100"
+                                    style={{ 
+                                      '--progress-background': 'transparent',
+                                      '--progress-foreground': getLineColor(item.candidate_id) 
+                                    } as React.CSSProperties}
+                                  />
+                                  
+                                  <div className="flex justify-between">
+                                    <span className="text-xs font-medium text-gray-500">
+                                      Position #{index + 1}
+                                    </span>
+                                    <span className="text-xs font-medium text-gray-500">
+                                      {votePercentage.toFixed(1)}% of total votes
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Progress 
-                                value={votePercentage} 
-                                className="h-2 bg-primary/20"
-                              />
-                              
-                              <div className="flex justify-between">
-                                <span className="text-xs text-gray-500">
-                                  Position #{index + 1}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {votePercentage.toFixed(1)}% of total votes
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })
-                )}
-              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                    )}
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
             </>
           )}
         </div>
