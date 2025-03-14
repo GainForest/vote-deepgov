@@ -1,48 +1,64 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { Vote, BarChart3, ChevronRight } from 'lucide-react';
+import { getUserData } from '@/utils/localStorageManager';
+import { toast } from 'sonner';
 
-const Index = () => {
+const Index: React.FC = () => {
   const navigate = useNavigate();
 
-  // Immediately redirect to the name page
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
+  const handleVoteClick = () => {
+    const userData = getUserData();
+    if (!userData) {
+      toast.info('Please create your profile before voting', {
+        description: 'You need to set up your voting profile first',
+        duration: 5000,
+      });
       navigate('/name');
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, [navigate]);
+      return;
+    }
+    navigate('/vote');
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="py-6 px-6 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-xl font-semibold">Vote App</h1>
-        </div>
-      </header>
-      
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-red-50">
       <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full mx-auto">
-          <div className="text-center mb-10 animate-fade-in">
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
-              WELCOME
+        <div className="max-w-md w-full space-y-8 text-center animate-fade-in">
+          <div>
+            <div className="mb-6 flex justify-center">
+              <div className="rounded-full bg-white p-3 shadow-md">
+                <Vote className="h-12 w-12 text-primary" />
+              </div>
             </div>
-            <h1 className="text-4xl font-bold mb-3">Voting App</h1>
-            <p className="text-gray-500 mb-6">
-              You'll be redirected to create your profile in a moment...
+            <h1 className="text-5xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-red-600">
+              Election Center
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">
+              Your vote matters in shaping our future
             </p>
-            
-            <Button 
-              onClick={() => navigate('/name')} 
-              className="mt-4 animate-pulse"
-            >
-              Continue to Profile
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
+          
+          <div className="grid gap-4">
+            <Button size="lg" className="w-full" onClick={handleVoteClick}>
+              <Vote className="mr-2 h-5 w-5" />
+              Cast Your Votes (with Profile)
+              <ChevronRight className="ml-auto h-5 w-5" />
+            </Button>
+            
+            <Link to="/leaderboard">
+              <Button size="lg" variant="secondary" className="w-full">
+                <BarChart3 className="mr-2 h-5 w-5" />
+                View Election Results
+                <ChevronRight className="ml-auto h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+          
+          <p className="text-sm text-gray-500 mt-8">
+            A secure voting platform with real-time result tracking
+          </p>
         </div>
       </main>
     </div>
