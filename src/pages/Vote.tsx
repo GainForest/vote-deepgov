@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, LogOut, User } from 'lucide-react';
+import { ChevronLeft, LogOut, User, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VoteDistribution from '@/components/VoteDistribution';
 import { defaultCandidates, getUserData, clearUserData } from '@/utils/localStorageManager';
@@ -47,12 +47,20 @@ const Vote = () => {
             Back
           </Link>
           <h1 className="text-xl font-semibold ml-auto mr-auto">Vote Distribution</h1>
-          {userName && (
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
-              <LogOut className="h-4 w-4 mr-1" />
-              Logout
-            </Button>
-          )}
+          <div className="flex gap-2">
+            <Link to="/leaderboard">
+              <Button variant="ghost" size="sm" className="text-gray-500">
+                <BarChart3 className="h-4 w-4 mr-1" />
+                Leaderboard
+              </Button>
+            </Link>
+            {userName && (
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
+                <LogOut className="h-4 w-4 mr-1" />
+                Logout
+              </Button>
+            )}
+          </div>
         </div>
       </header>
       
