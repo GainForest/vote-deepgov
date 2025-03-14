@@ -8,6 +8,7 @@ export type VoteRecord = {
   candidate_id: string;
   vote_count: number;
   created_at?: string;
+  updated_at?: string;
 };
 
 export type UserProfile = {

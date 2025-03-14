@@ -35,6 +35,7 @@ export type Database = {
           candidate_id: string
           created_at: string
           id: string
+          updated_at: string
           user_id: string
           vote_count: number
         }
@@ -42,6 +43,7 @@ export type Database = {
           candidate_id: string
           created_at?: string
           id?: string
+          updated_at?: string
           user_id: string
           vote_count: number
         }
@@ -49,6 +51,7 @@ export type Database = {
           candidate_id?: string
           created_at?: string
           id?: string
+          updated_at?: string
           user_id?: string
           vote_count?: number
         }
